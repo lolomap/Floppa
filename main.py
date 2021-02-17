@@ -99,10 +99,12 @@ async def process_message(session, event, chat_ide, user_ide):
         VkApi.send_message('Ваш профиль создан', session, event)
 
 
-async def main():
+def main():
     print('Bot started')
-    asyncio.ensure_future(update_feed_petted())
-    await asyncio.sleep(.004)
+    loop = asyncio.get_event_loop()
+    loop.run_forever()
+    loop.create_task(update_feed_petted())
+    # await asyncio.sleep(.004)
     while True:
         vk = VkApi.create_session()
         session = vk['session']
@@ -112,10 +114,9 @@ async def main():
                 print('Message catched')
                 chat_ide = event.obj.message['peer_id']
                 user_ide = event.obj.message['from_id']
-                asyncio.ensure_future(process_message(session, event, chat_ide, user_ide))
-                await asyncio.sleep(.004)
+                loop.create_task(process_message(session, event, chat_ide, user_ide))
+                # await asyncio.sleep(.004)
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    main()
