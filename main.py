@@ -5,6 +5,7 @@ from DataBaseApi import DataBase
 import Floppas
 import json
 import time
+import asyncio
 
 redis_db = DataBase()
 
@@ -98,7 +99,7 @@ async def process_message(session, event, chat_ide, user_ide):
 
 
 def main():
-    update_feed_petted()
+    asyncio.run(update_feed_petted())
     while True:
         vk = VkApi.create_session()
         session = vk['session']
@@ -108,7 +109,7 @@ def main():
             if VkApi.is_event_message(event.type) and event.from_chat:
                 chat_ide = event.obj.message['peer_id']
                 user_ide = event.obj.message['from_id']
-                process_message(session, event, chat_ide, user_ide)
+                asyncio.run(process_message(session, event, chat_ide, user_ide))
 
 
 if __name__ == '__main__':
