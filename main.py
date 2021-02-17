@@ -11,6 +11,7 @@ redis_db = DataBase()
 
 
 async def update_feed_petted():
+    print('Hungry loop started')
     while True:
         time.sleep(3600*4)
         print('Hungry all floppas')
@@ -100,7 +101,8 @@ async def process_message(session, event, chat_ide, user_ide):
 
 async def main():
     print('Bot started')
-    asyncio.create_task(update_feed_petted())
+    asyncio.ensure_future(update_feed_petted())
+    await asyncio.sleep(.004)
     while True:
         vk = VkApi.create_session()
         session = vk['session']
@@ -110,10 +112,10 @@ async def main():
                 print('Message catched')
                 chat_ide = event.obj.message['peer_id']
                 user_ide = event.obj.message['from_id']
-                asyncio.create_task(process_message(session, event, chat_ide, user_ide))
+                asyncio.ensure_future(process_message(session, event, chat_ide, user_ide))
+                await asyncio.sleep(.004)
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    asyncio.set_event_loop(loop)
     loop.run_until_complete(main())
