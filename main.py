@@ -64,7 +64,7 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Эта флоппа сыта', session, event)
                 return
             if type(is_feeded) == int or type(is_feeded) == float:
-                VkApi.send_message('Вы не можете кормить флоппу еще ' + str(is_feeded) + ' часов', session,
+                VkApi.send_message('Вы сможете покормить флоппу через ' + str(is_feeded) + ' часов', session,
                                    event)
                 return
             if is_feeded:
