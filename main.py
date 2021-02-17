@@ -78,7 +78,7 @@ async def process_message(session, event, chat_ide, user_ide):
         elif 'rename' in json.loads(event.obj.message['payload']).keys():
             if redis_db.rename_floppa(chat_ide, user_ide,
                                       int(json.loads(event.obj.message['payload'])['rename'][0]) - 1,
-                                      json.loads(event.obj.message['payload'])['feed'][1]):
+                                      json.loads(event.obj.message['payload'])['rename'][1]):
                 VkApi.send_message('Успешно', session, event)
             else:
                 VkApi.send_message('Ошибка', session, event)
