@@ -4,7 +4,6 @@ import VkApi
 from DataBaseApi import DataBase
 import Floppas
 import json
-import time
 import asyncio
 
 redis_db = DataBase()
@@ -13,7 +12,7 @@ redis_db = DataBase()
 async def update_feed_petted():
     print('Hungry loop started')
     while True:
-        time.sleep(3600*4)
+        await asyncio.sleep(3600*4)
         print('Hungry all floppas')
         redis_db.hungry_all_floppas()
 
@@ -99,21 +98,21 @@ async def process_message(session, event, chat_ide, user_ide):
         VkApi.send_message('Ваш профиль создан', session, event)
 
 
-def main():
+async def main():
     print('Bot started')
-    asyncio.run(update_feed_petted())
-    # loop.run_forever()
-    while True:
-        vk = VkApi.create_session()
-        session = vk['session']
-        longpoll = vk['longpoll']
-        for event in longpoll.listen():
-            if VkApi.is_event_message(event.type) and event.from_chat:
-                print('Message catched')
-                chat_ide = event.obj.message['peer_id']
-                user_ide = event.obj.message['from_id']
-                asyncio.run(process_message(session, event, chat_ide, user_ide))
+    vk = VkApi.create_session()
+    session = vk['session']
+    longpoll = vk['longpoll']
+    for event in longpoll.listen():
+        if VkApi.is_event_message(event.type) and event.from_chat:
+            print('Message catched')
+            chat_ide = event.obj.message['peer_id']
+            user_ide = event.obj.message['from_id']
+            await process_message(session, event, chat_ide, user_ide)
 
 
 if __name__ == '__main__':
-    main()
+    loop = asyncio.get_event_loop()
+    asyncio.ensure_future(update_feed_petted())
+    asyncio.ensure_future(main())
+    loop.run_forever()
