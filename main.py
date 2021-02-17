@@ -96,7 +96,7 @@ async def process_message(session, event, chat_ide, user_ide):
     elif msg_text == 'покормить флоппу':
         VkApi.request_feed(session, event)
     elif 'дать имя флоппе:' in msg_text:
-        VkApi.request_rename(session, event, msg_text.split(':')[1])
+        VkApi.request_rename(session, event, event.obj.message['text'].split(':')[1])
     elif msg_text == 'мой инвентарь':
         inv = redis_db.get_user_inventory(chat_ide, user_ide)
         if inv:
