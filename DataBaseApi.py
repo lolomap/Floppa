@@ -145,6 +145,16 @@ class DataBase:
             print('Ошибка: ', traceback.format_exc())
             return False
 
+    def rename_floppa(self, chat_id, user_id, flop_index, name):
+        try:
+            user_info = json.loads(bytes.decode(self.db.hget('Profiles:' + str(chat_id), str(user_id))))
+            user_info['floppas'][flop_index]['name'] = name
+            self.db.hset('Profiles:' + str(chat_id), str(user_id), json.dumps(user_info))
+            return True
+        except:
+            print('Ошибка: ', traceback.format_exc())
+            return False
+
     def feed_floppa(self, chat_id, user_id, flop_index):
         try:
             user_info = json.loads(bytes.decode(self.db.hget('Profiles:' + str(chat_id), str(user_id))))

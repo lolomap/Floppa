@@ -97,6 +97,17 @@ def request_feed(session, event):
                           keyboard=keyboard.get_keyboard())
 
 
+def request_rename(session, event, name):
+    keyboard = VkKeyboard(inline=True)
+    keyboard.add_button('1я', VkKeyboardColor.NEGATIVE, payload=json.dumps({'rename': [1, name]}))
+    keyboard.add_button('2я', VkKeyboardColor.POSITIVE, payload=json.dumps({'rename': [2, name]}))
+    keyboard.add_button('3я', VkKeyboardColor.PRIMARY, payload=json.dumps({'rename': [3, name]}))
+    session.messages.send(peer_id=event.obj.message['peer_id'],
+                          message='Какую флоппу переименовать?',
+                          random_id=random.randint(100000, 999999),
+                          keyboard=keyboard.get_keyboard())
+
+
 def send_message(msg, session, event):
     session.messages.send(peer_id=event.obj.message['peer_id'],
                           message=msg,

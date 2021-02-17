@@ -19,11 +19,12 @@ async def update_feed_petted():
 
 async def process_message(session, event, chat_ide, user_ide):
     print('Processing message')
-    if event.obj.message['text'].lower() == 'запускайте флопп':
+    msg_text = event.obj.message['text'].lower()
+    if msg_text == 'запускайте флопп':
         users = VkApi.get_chat_users(event.obj.message, session)
         redis_db.init_new_profiles(users, event.obj.message['peer_id'])
         VkApi.send_message('Профили участников беседы сброшены', session, event)
-    elif event.obj.message['text'].lower() == 'мои флоппы':
+    elif msg_text == 'мои флоппы':
         user_floppas = redis_db.get_user_floppas(chat_ide, user_ide)
         if not user_floppas:
             VkApi.send_floppa_info(None, session, event)
@@ -33,7 +34,7 @@ async def process_message(session, event, chat_ide, user_ide):
         else:
             for user_floppa in user_floppas:
                 VkApi.send_floppa_info(user_floppa.convert_to_message(), session, event)
-    elif event.obj.message['text'].lower() == 'крутить гачу':
+    elif msg_text == 'крутить гачу':
         floppa = Floppas.Floppa.gacha_roll()
 
         msg = redis_db.floppa_spawn(chat_ide, user_ide, floppa)
@@ -53,7 +54,7 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Вы еще не в клубе флопп', session, event)
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
-    elif 'я' in event.obj.message['text'] and '@flopbot' in event.obj.message['text']:
+    elif 'я' in msg_text and '@flopbot' in msg_text:
         if 'fid' in json.loads(event.obj.message['payload']).keys():
             if redis_db.exchange_floppa(chat_ide, user_ide,
                                         int(json.loads(event.obj.message['payload'])['fid']) - 1):
@@ -74,26 +75,35 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Успешно', session, event)
             else:
                 VkApi.send_message('Ошибка', session, event)
-    elif 'Запечатать' in event.obj.message['text'] and '@flopbot' in event.obj.message['text']:
+        elif 'rename' in json.loads(event.obj.message['payload']).keys():
+            if redis_db.rename_floppa(chat_ide, user_ide,
+                                      int(json.loads(event.obj.message['payload'])['rename'][0]) - 1,
+                                      json.loads(event.obj.message['payload'])['feed'][1]):
+                VkApi.send_message('Успешно', session, event)
+            else:
+                VkApi.send_message('Ошибка', session, event)
+    elif 'запечатать' in msg_text and '@flopbot' in msg_text:
         if json.loads(event.obj.message['payload'])['to_token']:
             if redis_db.add_token(chat_ide, user_ide):
                 VkApi.send_message('Успешно', session, event)
             else:
                 VkApi.send_message('Ошибка', session, event)
-    elif event.obj.message['text'].lower() == 'я, такая вот тварь, велю изничтожить всех моих флопп':
+    elif msg_text == 'я, такая вот тварь, велю изничтожить всех моих флопп':
         if redis_db.destroy_floppas(chat_ide, user_ide):
             VkApi.send_message('Твои флоппы успели сбежать, а ты будешь гореть в аду', session, event)
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
-    elif event.obj.message['text'].lower() == 'покормить флоппу':
+    elif msg_text == 'покормить флоппу':
         VkApi.request_feed(session, event)
-    elif event.obj.message['text'].lower() == 'мой инвентарь':
+    elif 'дать имя флоппе:' in msg_text:
+        VkApi.request_rename(session, event, msg_text.split(':')[1])
+    elif msg_text == 'мой инвентарь':
         inv = redis_db.get_user_inventory(chat_ide, user_ide)
         if inv:
             VkApi.send_inventory(inv, session, event)
         else:
             VkApi.send_message('Ошибка', session, event)
-    elif event.obj.message['text'].lower() == 'вступить в клуб флопп':
+    elif msg_text == 'вступить в клуб флопп':
         redis_db.init_new_profile(chat_ide, user_ide)
         VkApi.send_message('Ваш профиль создан', session, event)
 
