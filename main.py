@@ -99,6 +99,7 @@ async def process_message(session, event, chat_ide, user_ide):
 
 
 def main():
+    print('Bot started')
     asyncio.run(update_feed_petted())
     while True:
         vk = VkApi.create_session()
