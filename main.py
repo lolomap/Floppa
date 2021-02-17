@@ -100,17 +100,16 @@ async def process_message(session, event, chat_ide, user_ide):
 
 def main():
     print('Bot started')
-    asyncio.run(update_feed_petted())
+    asyncio.ensure_future(update_feed_petted())
     while True:
         vk = VkApi.create_session()
         session = vk['session']
         longpoll = vk['longpoll']
-        print('Session created')
         for event in longpoll.listen():
             if VkApi.is_event_message(event.type) and event.from_chat:
                 chat_ide = event.obj.message['peer_id']
                 user_ide = event.obj.message['from_id']
-                asyncio.run(process_message(session, event, chat_ide, user_ide))
+                asyncio.ensure_future(process_message(session, event, chat_ide, user_ide))
 
 
 if __name__ == '__main__':
