@@ -12,10 +12,12 @@ redis_db = DataBase()
 async def update_feed_petted():
     while True:
         time.sleep(3600*4)
+        print('Hungry all floppas')
         redis_db.hungry_all_floppas()
 
 
 async def process_message(session, event, chat_ide, user_ide):
+    print('Processing message')
     if event.obj.message['text'].lower() == 'запускайте флопп':
         users = VkApi.get_chat_users(event.obj.message, session)
         redis_db.init_new_profiles(users, event.obj.message['peer_id'])
@@ -101,7 +103,7 @@ def main():
         vk = VkApi.create_session()
         session = vk['session']
         longpoll = vk['longpoll']
-
+        print('Session created')
         for event in longpoll.listen():
             if VkApi.is_event_message(event.type) and event.from_chat:
                 chat_ide = event.obj.message['peer_id']
