@@ -113,4 +113,5 @@ def main():
                 asyncio.run(process_message(session, event, chat_ide, user_ide))
 
 
-main()
+if __name__ == '__main__':
+    main()
