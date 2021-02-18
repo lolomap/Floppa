@@ -24,7 +24,7 @@ async def process_message(session, event, chat_ide, user_ide):
         users = VkApi.get_chat_users(event.obj.message, session)
         redis_db.init_new_profiles(users, event.obj.message['peer_id'])
         VkApi.send_message('Профили участников беседы сброшены', session, event)
-    elif msg_text == 'мои флоппы':
+    elif msg_text == 'мои флоппы' or msg_text == 'vjb akjggs':
         user_floppas = redis_db.get_user_floppas(chat_ide, user_ide)
         if not user_floppas:
             VkApi.send_floppa_info(None, session, event)
@@ -34,7 +34,7 @@ async def process_message(session, event, chat_ide, user_ide):
         else:
             for user_floppa in user_floppas:
                 VkApi.send_floppa_info(user_floppa.convert_to_message(), session, event)
-    elif msg_text == 'крутить гачу':
+    elif msg_text == 'крутить гачу' or msg_text == 'rhenbnm ufxe':
         floppa = Floppas.Floppa.gacha_roll()
 
         msg = redis_db.floppa_spawn(chat_ide, user_ide, floppa)
@@ -55,6 +55,8 @@ async def process_message(session, event, chat_ide, user_ide):
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
     elif 'я' in msg_text and '@flopbot' in msg_text:
+        if 'payload' not in event.obj.message.keys():
+            return
         if 'fid' in json.loads(event.obj.message['payload']).keys():
             if redis_db.exchange_floppa(chat_ide, user_ide,
                                         int(json.loads(event.obj.message['payload'])['fid']) - 1):
@@ -83,6 +85,8 @@ async def process_message(session, event, chat_ide, user_ide):
             else:
                 VkApi.send_message('Ошибка', session, event)
     elif 'запечатать' in msg_text and '@flopbot' in msg_text:
+        if 'payload' not in event.obj.message.keys():
+            return
         if json.loads(event.obj.message['payload'])['to_token']:
             if redis_db.add_token(chat_ide, user_ide):
                 VkApi.send_message('Успешно', session, event)
@@ -93,11 +97,13 @@ async def process_message(session, event, chat_ide, user_ide):
             VkApi.send_message('Твои флоппы успели сбежать, а ты будешь гореть в аду', session, event)
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
-    elif msg_text == 'покормить флоппу':
+    elif msg_text == 'покормить флоппу' or msg_text == 'gjrjhvbnm akjgge':
         VkApi.request_feed(session, event)
+        return
     elif 'дать имя флоппе:' in msg_text:
         VkApi.request_rename(session, event, event.obj.message['text'].split(':')[1])
-    elif msg_text == 'мой инвентарь':
+        return
+    elif msg_text == 'мой инвентарь' or msg_text == 'vjq bydtynfhm':
         inv = redis_db.get_user_inventory(chat_ide, user_ide)
         if inv:
             VkApi.send_inventory(inv, session, event)
