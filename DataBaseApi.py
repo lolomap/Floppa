@@ -248,10 +248,10 @@ class DataBase:
             user_info = json.loads(bytes.decode(self.db.hget('Profiles:' + str(chat_id), str(user_id))))
             user_info_agr = json.loads(bytes.decode(self.db.hget('Profiles:' + str(chat_id),
                                                                  str(user_info['requested_duel'][0]))))
-            d1 = user_info['floppas'][flop_id]['damage']
-            d2 = user_info_agr['floppas'][user_info['requested_duel'][1]]['damage']
-            s1 = user_info['floppas'][flop_id]['size']
-            s2 = user_info_agr['floppas'][user_info['requested_duel'][1]]['size']
+            d1 = user_info['floppas'][flop_id-1]['damage']
+            d2 = user_info_agr['floppas'][user_info['requested_duel'][1]-1]['damage']
+            s1 = user_info['floppas'][flop_id-1]['size']
+            s2 = user_info_agr['floppas'][user_info['requested_duel'][1]-1]['size']
             winner = Floppas.Floppa.duel(d1, s1, d2, s2)
             user_info['requested_duel'] = None
             self.db.hset('Profiles:' + str(chat_id), str(user_id), json.dumps(user_info))
