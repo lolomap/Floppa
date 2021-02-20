@@ -57,6 +57,20 @@ class Floppa:
         return result
 
     @staticmethod
+    def duel(damage1, size1, damage2, size2):
+        hp1 = size1*10
+        hp2 = size2*10
+        while hp1 > 0 and hp2 > 0:
+            hp1 -= damage2
+            hp2 -= damage1
+        if hp1 > hp2:
+            return 1
+        elif hp1 == hp2:
+            return 3
+        else:
+            return 2
+
+    @staticmethod
     def gacha_roll():
         damage = 0
         flopping = 0

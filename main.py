@@ -54,7 +54,7 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Вы еще не в клубе флопп', session, event)
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
-    elif 'я' in msg_text and '@flopbot' in msg_text:
+    elif 'я' in msg_text and msg_text.startswith('@flopbot'):
         if 'payload' not in event.obj.message.keys():
             return
         if 'fid' in json.loads(event.obj.message['payload']).keys():
@@ -84,7 +84,7 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Успешно', session, event)
             else:
                 VkApi.send_message('Ошибка', session, event)
-    elif 'запечатать' in msg_text and '@flopbot' in msg_text:
+    elif 'запечатать' in msg_text and msg_text.startswith('@flopbot'):
         if 'payload' not in event.obj.message.keys():
             return
         if json.loads(event.obj.message['payload'])['to_token']:
@@ -92,12 +92,12 @@ async def process_message(session, event, chat_ide, user_ide):
                 VkApi.send_message('Успешно', session, event)
             else:
                 VkApi.send_message('Ошибка', session, event)
-    elif msg_text == 'я, такая вот тварь, велю изничтожить всех моих флопп':
+    elif msg_text == 'отпустить флопп':
         if redis_db.destroy_floppas(chat_ide, user_ide):
-            VkApi.send_message('Твои флоппы успели сбежать, а ты будешь гореть в аду', session, event)
+            VkApi.send_message('Флоппы ушли :(', session, event)
         else:
             VkApi.send_message('Вы еще не в клубе флопп', session, event)
-    elif msg_text == 'покормить флоппу' or msg_text == 'gjrjhvbnm akjgge':
+    elif msg_text == 'покормить флопп' or msg_text == 'gjrjhvbnm akjgg':
         VkApi.request_feed(session, event)
         return
     elif 'дать имя флоппе:' in msg_text:
@@ -112,6 +112,28 @@ async def process_message(session, event, chat_ide, user_ide):
     elif msg_text == 'вступить в клуб флопп':
         redis_db.init_new_profile(chat_ide, user_ide)
         VkApi.send_message('Ваш профиль создан', session, event)
+    elif msg_text.startswith('дуэль @'):
+        data = event.obj.message['text'].split('@')[1]
+        short_name = data.split(' ')[0]
+        duel_user_id = VkApi.get_user_id(short_name, session)
+        if redis_db.set_requested_duel(chat_ide, user_ide, duel_user_id, data.split(' ')[1]):
+            VkApi.request_duel(session, event)
+        else:
+            VkApi.send_message('Ошибка', session, event)
+    elif msg_text.startswith('дуэль принять '):
+        flop_id = int(msg_text.split(' ')[2])
+        winner = redis_db.accept_duel(chat_ide, user_ide, flop_id)
+        if type(winner) == int:
+            VkApi.send_duel_win(session, event, winner)
+        elif winner == 'Draw':
+            VkApi.send_message('Дуэль окончилась ничьей!', session, event)
+        else:
+            VkApi.send_message('Ошибка', session, event)
+    elif msg_text == 'дуэль отклонить' or msg_text == 'le\'km jnrkjybnm':
+        if redis_db.deny_duel(chat_ide, user_ide):
+            VkApi.send_message('Дуэль отклоненна', session, user_ide)
+        else:
+            VkApi.send_message('Ошибка', session, event)
 
 
 async def main():
@@ -128,7 +150,11 @@ async def main():
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    asyncio.ensure_future(update_feed_petted())
-    asyncio.ensure_future(main())
-    loop.run_forever()
+    while True:
+        try:
+            loop = asyncio.get_event_loop()
+            asyncio.ensure_future(update_feed_petted())
+            asyncio.ensure_future(main())
+            loop.run_forever()
+        except:
+            pass

@@ -37,6 +37,11 @@ def get_chat_users(msg, session):
     return profiles
 
 
+def get_user_id(short_name, session):
+    user = session.users.get(user_ids=short_name)[0]
+    return user['id']
+
+
 def send_floppa_info(floppa_msg, session, event):
     if floppa_msg is None:
         session.messages.send(peer_id=event.obj.message['peer_id'],
@@ -106,6 +111,21 @@ def request_rename(session, event, name):
                           message='Какую флоппу переименовать?',
                           random_id=random.randint(100000, 999999),
                           keyboard=keyboard.get_keyboard())
+
+
+def request_duel(session, event):
+    session.messages.send(peer_id=event.obj.message['peer_id'],
+                          message='Вы бросили вызов на дуэль.\n'+
+                                  'Противник должен написать "Дуэль принять [Номер флоппы]" или "Дуэль отклонить"',
+                          random_id=random.randint(100000, 999999))
+
+
+def send_duel_win(session, event, uid):
+    user = session.users.get(user_ids=uid)[0]
+    name = user['first_name'] + ' ' + user['last_name']
+    session.messages.send(peer_id=event.obj.message['peer_id'],
+                          message='Забив окончен\n' + name + ' победил в дуэли!',
+                          random_id=random.randint(100000, 999999))
 
 
 def send_message(msg, session, event):
